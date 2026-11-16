@@ -1,6 +1,6 @@
-# Personal To-Do
+# MINH//OS — Personal To-Do
 
-A customizable to-do app. Python (Flask + SQLite) backend, vanilla JS frontend.
+Minh's customizable to-do app with a neon cyber look and an animated background. Python (Flask + SQLite) backend, vanilla JS frontend.
 
 ## Run
 ```bash
@@ -15,7 +15,8 @@ Every feature has its own section, picked from the side menu (a slide-out drawer
 
 | Group | Section | What it does |
 |---|---|---|
-| Tasks | Dashboard | Streak, today's progress, overdue/open counts, up next, 7-day chart, quick Pomodoro |
+| Tasks | Dashboard | Greeting for Minh, streak, today's progress, overdue/open counts, up next, today's schedule, 7-day chart, quick Pomodoro |
+| | Daily schedule | Timeline of time blocks for each day with a tick to mark each done; blocks repeat every day, weekdays, weekends or only one day; the current block is highlighted |
 | | Today / Week | Tasks due today (incl. overdue) / in the next 7 days |
 | | All tasks | Search plus tag, priority and status filters |
 | Views | Calendar | Month grid; click a day to add a task on that date |
@@ -23,7 +24,7 @@ Every feature has its own section, picked from the side menu (a slide-out drawer
 | | Focus | One task at a time, highest priority first |
 | Tools | Pomodoro | Big timer, adjustable focus/break minutes, sessions counted per day |
 | | Stats | 14-day completions, open tasks by tag and by priority |
-| System | Settings | Language (EN/VI), dark/light, accent color, scanline effect, shortcuts |
+| System | Settings | Your name, language (EN/VI), dark/light, accent color, scanline effect, animated background, interaction effects, shortcuts |
 | | Data | Export/Import JSON, clear completed tasks |
 
 - Tasks: deadline, priority, tag (e.g. course/project), notes, subtasks, status, recurring (daily/weekly/monthly)

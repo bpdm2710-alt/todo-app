@@ -1,0 +1,22 @@
+# One-click deploy on Render (https://render.com): New > Blueprint > pick this repo.
+# The disk keeps todo.db across deploys; set APP_PASSWORD in the dashboard when asked.
+services:
+  - type: web
+    name: minh-os
+    runtime: python
+    plan: starter
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app --workers 1 --threads 4 --bind 0.0.0.0:$PORT
+    envVars:
+      - key: APP_PASSWORD
+        sync: false
+      - key: SECRET_KEY
+        generateValue: true
+      - key: SECURE_COOKIES
+        value: "1"
+      - key: TODO_DB
+        value: /var/data/todo.db
+    disk:
+      name: data
+      mountPath: /var/data
+      sizeGB: 1

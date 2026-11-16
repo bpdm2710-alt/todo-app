@@ -2,12 +2,20 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#0a0f2c">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#e6fbff">
+<meta name="description" content="MINH//OS: Minh's tasks, daily schedule and focus timer">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png">
+<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="MINH//OS">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <title>MINH//OS</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800&family=Chakra+Petch:wght@500;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
 <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
@@ -27,6 +35,11 @@
 </div>
 <div id="scrim"></div>
 <div id="toast" role="status"></div>
+<div id="dock" hidden aria-label="Music player">
+  <div id="dockVideo"><div id="ytHost"></div></div>
+  <div class="dock-bar"><span class="eq on"><i></i><i></i><i></i></span><span id="dockTitle"></span>
+    <button id="dockPlay" aria-label="Play / pause">▶</button><button id="dockNext" aria-label="Next">⏭</button><button id="dockMin" aria-label="Minimise video">▭</button><button id="dockClose" aria-label="Stop music">✕</button></div>
+</div>
 <div id="fx" aria-hidden="true"></div>
 <script src="/static/app.js"></script>
 </body>

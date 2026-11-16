@@ -41,7 +41,16 @@ A dark neon theme is still available in Settings → Theme.
 Set `APP_PASSWORD` and the app shows a sign-in page; the session lasts a year on each device. Without it there is no login,
 so always set it before putting the app on the internet. `SECRET_KEY` keeps people signed in across restarts.
 
-## Put it online with your own link (Render)
+## Put it online for free (GitHub Pages)
+The workflow `.github/workflows/pages.yml` publishes the app to GitHub Pages on every push to `master`.
+1. One time only: on GitHub open the repo → **Settings → Pages → Build and deployment → Source: GitHub Actions**.
+2. Merge to `master` (or run the workflow from the **Actions** tab). The app is live at `https://bpdm2710-alt.github.io/todo-app/`.
+3. Optional own domain: buy one (e.g. `minhos.app`), enter it under **Settings → Pages → Custom domain**, and add the DNS record GitHub shows. HTTPS is free.
+
+On Pages there is no Python server, so **data is saved in the browser of each device** (iPhone and laptop keep separate lists).
+Use **Data → Export / Import JSON** to back up or move data. There is no password: anyone with the link sees an empty app, never your data.
+
+## Put it online with sync between devices (Render, paid)
 1. Create an account at render.com and choose **New → Blueprint**, then pick this repository. `render.yaml` sets everything up:
    gunicorn, a 1 GB disk for `todo.db` (data survives deploys), HTTPS, and a generated `SECRET_KEY`.
 2. When asked, enter `APP_PASSWORD`.

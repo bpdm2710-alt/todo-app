@@ -19,7 +19,7 @@ const TX = {
     clearDone: 'Clear completed tasks', confirmClear: 'Delete all completed tasks?', cleared: 'Completed tasks cleared', focusMin: 'Focus minutes', breakMin: 'Break minutes',
     sessions: 'Sessions today', shortcuts: 'Keyboard shortcuts', untagged: 'untagged', invalid: 'Invalid file', doneToday: 'Done today', effects: 'Scanline effect',
     seeAll: 'See all', kNav: 'Jump to menu item', kNew: 'New task', kSearch: 'Search', kEsc: 'Close menu / editor', table: 'Show as table', date: 'Date', count: 'Count',
-    backup: 'Backup', danger: 'Cleanup', dataHint: 'Everything is stored in todo.db on the machine running the app.', skipBreak: 'Skip phase', nothing: 'No data yet', results: 'results',
+    backup: 'Backup', danger: 'Cleanup', dataHint: 'Everything is stored in todo.db on the machine running the app.', dataHintLocal: 'Your data is saved in this browser on this device only. Export JSON now and then as a backup, and import it to move to another device.', saveFail: 'Could not save: browser storage is full or blocked', skipBreak: 'Skip phase', nothing: 'No data yet', results: 'results',
     schedule: 'Daily schedule', gMorning: 'Good morning', gNoon: 'Good afternoon', gAfternoon: 'Good afternoon', gEvening: 'Good evening', gNight: 'Up late',
     tasksDue: 'tasks due today', blocksLeft: 'time blocks left', schedProgress: 'Schedule progress', blocks: 'blocks', nowDoing: 'Now', nextUp: 'Next', nowTag: 'NOW', missed: 'Missed',
     schedEmpty: 'No time blocks yet, {n}. Add one with the form.', addBlock: 'Add time block', blockPh: 'What are you doing then?',
@@ -40,7 +40,7 @@ const TX = {
     clearDone: 'Xóa các việc đã xong', confirmClear: 'Xóa tất cả việc đã xong?', cleared: 'Đã xóa các việc đã xong', focusMin: 'Phút tập trung', breakMin: 'Phút nghỉ',
     sessions: 'Phiên hôm nay', shortcuts: 'Phím tắt', untagged: 'không nhãn', invalid: 'Tệp không hợp lệ', doneToday: 'Xong hôm nay', effects: 'Hiệu ứng quét dòng',
     seeAll: 'Xem tất cả', kNav: 'Chuyển mục menu', kNew: 'Việc mới', kSearch: 'Tìm kiếm', kEsc: 'Đóng menu / trình sửa', table: 'Xem dạng bảng', date: 'Ngày', count: 'Số lượng',
-    backup: 'Sao lưu', danger: 'Dọn dẹp', dataHint: 'Mọi dữ liệu được lưu trong todo.db trên máy chạy ứng dụng.', skipBreak: 'Chuyển pha', nothing: 'Chưa có dữ liệu', results: 'kết quả',
+    backup: 'Sao lưu', danger: 'Dọn dẹp', dataHint: 'Mọi dữ liệu được lưu trong todo.db trên máy chạy ứng dụng.', dataHintLocal: 'Dữ liệu được lưu ngay trong trình duyệt của thiết bị này. Thỉnh thoảng nhớ Xuất JSON để sao lưu, và Nhập JSON để chuyển sang máy khác.', saveFail: 'Không lưu được: bộ nhớ trình duyệt đầy hoặc bị chặn', skipBreak: 'Chuyển pha', nothing: 'Chưa có dữ liệu', results: 'kết quả',
     schedule: 'Lịch mỗi ngày', gMorning: 'Chào buổi sáng', gNoon: 'Chào buổi trưa', gAfternoon: 'Chào buổi chiều', gEvening: 'Chào buổi tối', gNight: 'Khuya rồi',
     tasksDue: 'việc đến hạn hôm nay', blocksLeft: 'khung giờ còn lại', schedProgress: 'Tiến độ lịch ngày', blocks: 'khung', nowDoing: 'Đang diễn ra', nextUp: 'Tiếp theo', nowTag: 'ĐANG LÀM', missed: 'Đã lỡ',
     schedEmpty: 'Chưa có khung giờ nào, {n} ơi. Thêm bằng biểu mẫu nhé.', addBlock: 'Thêm khung giờ', blockPh: 'Làm gì trong khung này?',
@@ -70,8 +70,21 @@ const F = { q: '', tag: '', prio: '', status: '' };
 const t = k => ((TX[S.settings.lang] || TX.en)[k] || TX.en[k] || k).replace('{n}', who());
 
 let timer;
-const save = () => { clearTimeout(timer); timer = setTimeout(() => fetch('/api/state', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(S) }).then(authCheck), 300); };
-const authCheck = r => { if (r.status === 401) location.href = '/login'; return r; };
+// Two storage modes: the Flask server (todo.db), or this browser only when the page is a static site (GitHub Pages).
+const LOCAL = !!window.MINH_STATIC, KEY = 'minh-os-state';
+const save = () => {
+  clearTimeout(timer);
+  timer = setTimeout(() => {
+    if (LOCAL) { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch { toast(t('saveFail')); } return; }
+    fetch('api/state', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(S) }).then(authCheck);
+  }, 300);
+};
+const authCheck = r => { if (r.status === 401) location.href = 'login'; return r; };
+function loadState() {
+  if (!LOCAL) return fetch('api/state').then(authCheck).then(r => r.json());
+  navigator.storage?.persist?.(); // ask the browser not to evict the data
+  try { return Promise.resolve(JSON.parse(localStorage.getItem(KEY) || '{}')); } catch { return Promise.resolve({}); }
+}
 let toastT;
 const toast = m => { const x = $('#toast'); x.textContent = m; x.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => x.classList.remove('show'), 1800); };
 const update = () => { save(); render(); };
@@ -436,7 +449,7 @@ function settingsView(v) {
 }
 
 function dataView(v) {
-  const c = el('div', 'card', `<h3>${t('backup')}</h3><p class="meta" style="margin:0 0 12px">${t('dataHint')}</p><div class="row wrap"></div>`);
+  const c = el('div', 'card', `<h3>${t('backup')}</h3><p class="meta" style="margin:0 0 12px">${t(LOCAL ? 'dataHintLocal' : 'dataHint')}</p><div class="row wrap"></div>`);
   const ex = el('button', 'btn', '⇩ ' + t('export')); ex.onclick = () => {
     const a = el('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(S, null, 2)], { type: 'application/json' })); a.download = `${who().toLowerCase().replace(/\W+/g, '-') || 'minh'}-todo-${today()}.json`; a.click();
   };
@@ -451,8 +464,8 @@ function dataView(v) {
   const cl = el('button', 'btn danger', `${t('clearDone')} (${done})`); cl.disabled = !done;
   cl.onclick = () => { if (confirm(t('confirmClear'))) { S.tasks = S.tasks.filter(x => x.status !== 'done'); update(); toast(t('cleared')); } };
   d.append(cl);
-  const lo = el('a', 'btn', '⏻ ' + t('logout')); lo.href = '/logout'; lo.style.cssText = 'display:inline-block;margin-top:14px;text-decoration:none';
-  v.append(c, d, lo);
+  const lo = el('a', 'btn', '⏻ ' + t('logout')); lo.href = 'logout'; lo.style.cssText = 'display:inline-block;margin-top:14px;text-decoration:none';
+  v.append(c, d); if (!LOCAL) v.append(lo);
 }
 
 // ---- daily schedule: repeating routine blocks + one-off blocks per day, ticked off per day ----
@@ -716,7 +729,7 @@ function boot() {
   S.sched = S.sched || {};
   S.settings.v = 4; P.left = P.total(); fromHash();
 }
-fetch('/api/state').then(authCheck).then(r => r.json()).then(d => {
+loadState().then(d => {
   if (d && d.tasks) {
     S = { ...S, ...d, settings: { ...S.settings, ...d.settings }, pomoLog: d.pomoLog || {}, sched: d.sched || {} };
     if (!d.settings?.v) { if (S.settings.accent === OLD_ACCENT) S.settings.accent = ACCENTS[0]; S.settings.dark = true; }
@@ -725,4 +738,4 @@ fetch('/api/state').then(authCheck).then(r => r.json()).then(d => {
   }
   boot();
 }).catch(boot);
-if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(() => { });
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => { });

@@ -26,7 +26,7 @@ const TX = {
     cat_work: 'Work', cat_study: 'Study', cat_health: 'Health', cat_rest: 'Rest', cat_me: 'Personal',
     rep_once: 'This day only', rep_all: 'Every day', rep_wd: 'Weekdays', rep_we: 'Weekend', routineHint: 'Repeating block: changes apply to every matching day.',
     blockAdded: 'Time block added', blockDeleted: 'Time block deleted', allDone: 'Day complete. Great work, {n}!', openSched: 'Open schedule', todaySched: 'Today\'s schedule',
-    name: 'Your name', bgAnim: 'Animated background', motion: 'Interaction effects', on: 'On', off: 'Off', start_t: 'Start', end_t: 'End'
+    name: 'Your name', bgAnim: 'Animated background', motion: 'Interaction effects', on: 'On', off: 'Off', start_t: 'Start', end_t: 'End', logout: 'Sign out'
   },
   vi: {
     dashboard: 'Tổng quan', today: 'Hôm nay', week: 'Tuần này', all: 'Tất cả', calendar: 'Lịch', board: 'Bảng', focus: 'Tập trung', pomodoro: 'Pomodoro', stats: 'Thống kê', settings: 'Cài đặt', data: 'Dữ liệu',
@@ -47,7 +47,7 @@ const TX = {
     cat_work: 'Công việc', cat_study: 'Học tập', cat_health: 'Sức khỏe', cat_rest: 'Nghỉ ngơi', cat_me: 'Cá nhân',
     rep_once: 'Chỉ ngày này', rep_all: 'Mỗi ngày', rep_wd: 'Ngày thường', rep_we: 'Cuối tuần', routineHint: 'Khung lặp lại: thay đổi áp dụng cho mọi ngày tương ứng.',
     blockAdded: 'Đã thêm khung giờ', blockDeleted: 'Đã xóa khung giờ', allDone: 'Hoàn tất cả ngày rồi, giỏi lắm {n}!', openSched: 'Mở lịch ngày', todaySched: 'Lịch hôm nay',
-    name: 'Tên của bạn', bgAnim: 'Nền động', motion: 'Hiệu ứng tương tác', on: 'Bật', off: 'Tắt', start_t: 'Bắt đầu', end_t: 'Kết thúc'
+    name: 'Tên của bạn', bgAnim: 'Nền động', motion: 'Hiệu ứng tương tác', on: 'Bật', off: 'Tắt', start_t: 'Bắt đầu', end_t: 'Kết thúc', logout: 'Đăng xuất'
   }
 };
 
@@ -59,10 +59,10 @@ const MENU = [
 ];
 const ORDER = MENU.flatMap(g => g[1].map(x => x[0]));
 const WITH_ADD = new Set(['today', 'week', 'all', 'calendar', 'board']);
-const ACCENTS = ['#00e5ff', '#ff2e88', '#2dffa0', '#ffc23d', '#a66bff', '#ff6b2d'];
+const ACCENTS = ['#00b4d8', '#00e5ff', '#ff2e88', '#2dffa0', '#ffc23d', '#a66bff', '#ff6b2d'];
 const OLD_ACCENT = '#1f6f8b';
 
-let S = { tasks: [], settings: { lang: 'en', dark: true, accent: ACCENTS[0], fx: true, focusMin: 25, breakMin: 5, name: 'Minh', bgAnim: true, motion: true }, log: {}, pomoLog: {}, sched: {} };
+let S = { tasks: [], settings: { lang: 'vi', dark: false, accent: ACCENTS[0], fx: true, focusMin: 25, breakMin: 5, name: 'Minh', bgAnim: true, motion: true }, log: {}, pomoLog: {}, sched: {} };
 let view = 'dashboard', cal = new Date(), open = null, dragId = null, focusIdx = 0, lastView = null, justId = null;
 const who = () => (S.settings.name || '').trim() || 'Minh';
 const RM = () => !S.settings.motion || matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -70,7 +70,8 @@ const F = { q: '', tag: '', prio: '', status: '' };
 const t = k => ((TX[S.settings.lang] || TX.en)[k] || TX.en[k] || k).replace('{n}', who());
 
 let timer;
-const save = () => { clearTimeout(timer); timer = setTimeout(() => fetch('/api/state', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(S) }), 300); };
+const save = () => { clearTimeout(timer); timer = setTimeout(() => fetch('/api/state', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(S) }).then(authCheck), 300); };
+const authCheck = r => { if (r.status === 401) location.href = '/login'; return r; };
 let toastT;
 const toast = m => { const x = $('#toast'); x.textContent = m; x.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => x.classList.remove('show'), 1800); };
 const update = () => { save(); render(); };
@@ -130,8 +131,8 @@ function render() {
   r.lang = S.settings.lang;
   document.body.classList.toggle('fx', !!S.settings.fx);
   const dark = !!S.settings.dark;
-  document.querySelector('meta[name=theme-color]').content = dark ? '#0a0f2c' : '#eef3ff';
-  BG.set({ bg: dark ? '#0a0f2c' : '#eef3ff', accent: S.settings.accent, hi: dark ? '#ff3d9a' : '#e0337f', vio: dark ? '#8a6bff' : '#7a5cff', dark });
+  document.querySelector('meta[name=theme-color]').content = dark ? '#0a0f2c' : '#e6fbff';
+  BG.set({ bg: dark ? '#0a0f2c' : '#e6fbff', accent: S.settings.accent, hi: dark ? '#ff3d9a' : '#3dffb0', vio: dark ? '#8a6bff' : '#7aa8ff', dark });
   BG.run(S.settings.bgAnim && !matchMedia('(prefers-reduced-motion: reduce)').matches && !document.hidden);
   const entering = view !== lastView; lastView = view;
   renderNav(entering); renderHud();
@@ -450,7 +451,8 @@ function dataView(v) {
   const cl = el('button', 'btn danger', `${t('clearDone')} (${done})`); cl.disabled = !done;
   cl.onclick = () => { if (confirm(t('confirmClear'))) { S.tasks = S.tasks.filter(x => x.status !== 'done'); update(); toast(t('cleared')); } };
   d.append(cl);
-  v.append(c, d);
+  const lo = el('a', 'btn', '⏻ ' + t('logout')); lo.href = '/logout'; lo.style.cssText = 'display:inline-block;margin-top:14px;text-decoration:none';
+  v.append(c, d, lo);
 }
 
 // ---- daily schedule: repeating routine blocks + one-off blocks per day, ticked off per day ----
@@ -712,12 +714,15 @@ setInterval(() => {
 function boot() {
   if (!Array.isArray(S.routine)) S.routine = seedRoutine();
   S.sched = S.sched || {};
-  S.settings.v = 3; P.left = P.total(); fromHash();
+  S.settings.v = 4; P.left = P.total(); fromHash();
 }
-fetch('/api/state').then(r => r.json()).then(d => {
+fetch('/api/state').then(authCheck).then(r => r.json()).then(d => {
   if (d && d.tasks) {
     S = { ...S, ...d, settings: { ...S.settings, ...d.settings }, pomoLog: d.pomoLog || {}, sched: d.sched || {} };
     if (!d.settings?.v) { if (S.settings.accent === OLD_ACCENT) S.settings.accent = ACCENTS[0]; S.settings.dark = true; }
+    // v4: Aqua Daylight becomes the default look
+    if ((d.settings?.v || 0) < 4) { S.settings.dark = false; S.settings.accent = ACCENTS[0]; }
   }
   boot();
 }).catch(boot);
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(() => { });

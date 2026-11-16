@@ -22,7 +22,7 @@ Every feature has its own section, picked from the side menu (a slide-out drawer
 | Views | Calendar | Month grid; click a day to add a task on that date |
 | | Board | Kanban (To do / Doing / Done) with drag and drop |
 | | Focus | One task at a time, highest priority first |
-| Tools | Pomodoro | Big timer, adjustable focus/break minutes, sessions counted per day |
+| Tools | Pomodoro | Big timer, adjustable focus/break minutes, sessions counted per day; focus music: a list of YouTube Pomodoro / lofi videos (or your own link) that starts with the timer and keeps playing in a mini player across sections, plus built-in rain / brown noise / ocean sounds that need no internet |
 | | Stats | 14-day completions, open tasks by tag and by priority |
 | System | Settings | Your name, language (EN/VI), dark/light, accent color, scanline effect, animated background, interaction effects, shortcuts |
 | | Data | Export/Import JSON, clear completed tasks |
@@ -34,7 +34,8 @@ Every feature has its own section, picked from the side menu (a slide-out drawer
 - Data: everything is stored in `todo.db`
 
 ## Look
-The default look is **Aqua Daylight** (light): pale water blue with frosted glass panels and an animated background.
+The default look is **Aqua Daylight** (light): pale water blue with frosted glass panels, Fraunces / Newsreader / IBM Plex Mono fonts,
+and an animated background where a runner chases a goal flag across a city skyline. On desktop the menu and the content scroll separately.
 A dark neon theme is still available in Settings → Theme.
 
 ## Password

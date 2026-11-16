@@ -26,7 +26,9 @@ const TX = {
     cat_work: 'Work', cat_study: 'Study', cat_health: 'Health', cat_rest: 'Rest', cat_me: 'Personal',
     rep_once: 'This day only', rep_all: 'Every day', rep_wd: 'Weekdays', rep_we: 'Weekend', routineHint: 'Repeating block: changes apply to every matching day.',
     blockAdded: 'Time block added', blockDeleted: 'Time block deleted', allDone: 'Day complete. Great work, {n}!', openSched: 'Open schedule', todaySched: 'Today\'s schedule',
-    name: 'Your name', bgAnim: 'Animated background', motion: 'Interaction effects', on: 'On', off: 'Off', start_t: 'Start', end_t: 'End', logout: 'Sign out'
+    name: 'Your name', bgAnim: 'Animated background', motion: 'Interaction effects', on: 'On', off: 'Off', start_t: 'Start', end_t: 'End', logout: 'Sign out',
+    music: 'Focus music', autoMusic: 'Play when I press Start', pasteYt: 'Paste a YouTube link…', addYt: 'Add', badYt: 'That does not look like a YouTube link', ambient: 'Built-in sounds (no internet needed)',
+    amb_off: 'Off', amb_rain: 'Rain', amb_brown: 'Brown noise', amb_ocean: 'Ocean', volume: 'Volume', openYt: 'Open on YouTube', stopMusic: 'Stop music', nextTrack: 'Next', ytNote: 'Videos that have their own timer: press Start in the app as the video starts its first round.', myLink: 'My link', noYt: 'No YouTube (built-in sounds only)'
   },
   vi: {
     dashboard: 'Tổng quan', today: 'Hôm nay', week: 'Tuần này', all: 'Tất cả', calendar: 'Lịch', board: 'Bảng', focus: 'Tập trung', pomodoro: 'Pomodoro', stats: 'Thống kê', settings: 'Cài đặt', data: 'Dữ liệu',
@@ -47,7 +49,9 @@ const TX = {
     cat_work: 'Công việc', cat_study: 'Học tập', cat_health: 'Sức khỏe', cat_rest: 'Nghỉ ngơi', cat_me: 'Cá nhân',
     rep_once: 'Chỉ ngày này', rep_all: 'Mỗi ngày', rep_wd: 'Ngày thường', rep_we: 'Cuối tuần', routineHint: 'Khung lặp lại: thay đổi áp dụng cho mọi ngày tương ứng.',
     blockAdded: 'Đã thêm khung giờ', blockDeleted: 'Đã xóa khung giờ', allDone: 'Hoàn tất cả ngày rồi, giỏi lắm {n}!', openSched: 'Mở lịch ngày', todaySched: 'Lịch hôm nay',
-    name: 'Tên của bạn', bgAnim: 'Nền động', motion: 'Hiệu ứng tương tác', on: 'Bật', off: 'Tắt', start_t: 'Bắt đầu', end_t: 'Kết thúc', logout: 'Đăng xuất'
+    name: 'Tên của bạn', bgAnim: 'Nền động', motion: 'Hiệu ứng tương tác', on: 'Bật', off: 'Tắt', start_t: 'Bắt đầu', end_t: 'Kết thúc', logout: 'Đăng xuất',
+    music: 'Nhạc tập trung', autoMusic: 'Tự phát khi bấm Bắt đầu', pasteYt: 'Dán link YouTube…', addYt: 'Thêm', badYt: 'Link YouTube không hợp lệ', ambient: 'Âm thanh có sẵn (không cần mạng)',
+    amb_off: 'Tắt', amb_rain: 'Mưa', amb_brown: 'Ồn nâu', amb_ocean: 'Sóng biển', volume: 'Âm lượng', openYt: 'Mở trên YouTube', stopMusic: 'Tắt nhạc', nextTrack: 'Bài tiếp', ytNote: 'Video có đồng hồ riêng: bấm Bắt đầu trong app đúng lúc video vào hiệp đầu tiên.', myLink: 'Link của tôi', noYt: 'Không phát YouTube (chỉ âm thanh có sẵn)'
   }
 };
 
@@ -114,7 +118,7 @@ function todayStats() {
 
 // ---- routing & menu ----
 function go(k) { if (location.hash !== '#' + k) location.hash = k; else { view = k; render(); } }
-function fromHash() { const k = location.hash.slice(1); view = ORDER.includes(k) ? k : 'dashboard'; open = null; setMenu(false); render(); window.scrollTo(0, 0); }
+function fromHash() { const k = location.hash.slice(1); view = ORDER.includes(k) ? k : 'dashboard'; open = null; setMenu(false); render(); window.scrollTo(0, 0); $('main').scrollTo?.(0, 0); }
 function setMenu(on) { $('#nav').classList.toggle('open', on); $('#scrim').classList.toggle('on', on); $('#menuBtn').setAttribute('aria-expanded', on); }
 
 function onAccent(hex) {
@@ -132,7 +136,7 @@ function render() {
   document.body.classList.toggle('fx', !!S.settings.fx);
   const dark = !!S.settings.dark;
   document.querySelector('meta[name=theme-color]').content = dark ? '#0a0f2c' : '#e6fbff';
-  BG.set({ bg: dark ? '#0a0f2c' : '#e6fbff', accent: S.settings.accent, hi: dark ? '#ff3d9a' : '#3dffb0', vio: dark ? '#8a6bff' : '#7aa8ff', dark });
+  BG.set({ bg: dark ? '#0a0f2c' : '#e6fbff', accent: S.settings.accent, hi: dark ? '#ff3d9a' : '#3dffb0', vio: dark ? '#8a6bff' : '#7aa8ff', flag: dark ? '#ff3d9a' : '#ff5c8a', runner: dark ? '#e9fbff' : '#0a4a63', dark });
   BG.run(S.settings.bgAnim && !matchMedia('(prefers-reduced-motion: reduce)').matches && !document.hidden);
   const entering = view !== lastView; lastView = view;
   renderNav(entering); renderHud();
@@ -371,7 +375,7 @@ function pomoView(v) {
     d.querySelector('input').onchange = e => { S.settings[k] = Math.max(1, Math.min(180, +e.target.value || 1)); if (!P.run) P.left = P.total(); update(); };
     info.append(d);
   }
-  v.append(c, info);
+  v.append(c, info, musicCard());
 }
 
 function dayChart(n) {
@@ -611,12 +615,13 @@ document.addEventListener('pointermove', e => {
 // ---- animated background: drifting neon aurora, perspective grid floor, linked particles ----
 const BG = (() => {
   const c = $('#bg'), g = c.getContext('2d');
-  let w = 0, h = 0, pts = [], raf = 0, last = 0, col = null, mx = .5, my = .5, sx = .5, sy = .5;
+  let w = 0, h = 0, pts = [], sky = [], skyW = 1, raf = 0, last = 0, col = null, mx = .5, my = .5, sx = .5, sy = .5;
   const rgba = (hex, a) => { const n = parseInt(String(hex).slice(1, 7), 16) || 0; return `rgba(${n >> 16 & 255},${n >> 8 & 255},${n & 255},${a})`; };
   function size() {
     const dpr = Math.min(2, devicePixelRatio || 1); w = innerWidth; h = innerHeight;
     c.width = w * dpr; c.height = h * dpr; g.setTransform(dpr, 0, 0, dpr, 0, 0);
-    pts = Array.from({ length: Math.min(80, Math.round(w * h / 20000)) }, () => ({ x: Math.random() * w, y: Math.random() * h, vx: (Math.random() - .5) * .4, vy: (Math.random() - .5) * .4, r: Math.random() * 1.5 + .6 }));
+    pts = Array.from({ length: Math.min(40, Math.round(w * h / 36000)) }, () => ({ x: Math.random() * w, y: Math.random() * h * .75, vx: (Math.random() - .5) * .3, vy: (Math.random() - .5) * .2, r: Math.random() * 1.4 + .5 }));
+    sky = []; let x = 0; while (x < w + 200) { const bw = 30 + Math.random() * 70; sky.push({ x, w: bw - 6, h: (40 + Math.random() * 160) * Math.max(.7, h / 900) }); x += bw; } skyW = x;
   }
   function draw(T, moving) {
     if (!col) return;
@@ -631,46 +636,217 @@ const BG = (() => {
       g.fillStyle = gr; g.fillRect(0, 0, w, h);
     }
     g.globalCompositeOperation = 'source-over';
-    // grid floor
-    const hz = h * .6, vx = w / 2 + (sx - .5) * 80, A = dk ? .32 : .22;
-    const fade = g.createLinearGradient(0, hz, 0, h); fade.addColorStop(0, rgba(col.accent, 0)); fade.addColorStop(1, rgba(col.accent, A));
-    g.strokeStyle = fade; g.lineWidth = 1; g.beginPath();
-    for (let i = -16; i <= 16; i++) { g.moveTo(vx + i * 6, hz); g.lineTo(vx + i * w / 7, h); }
-    g.stroke();
-    const off = (T * .25) % 1;
-    for (let j = 0; j < 14; j++) {
-      const p = (j + off) / 14, y = hz + (h - hz) * p * p;
-      g.strokeStyle = rgba(col.accent, A * p); g.beginPath(); g.moveTo(0, y); g.lineTo(w, y); g.stroke();
-    }
-    const hl = g.createLinearGradient(0, 0, w, 0); hl.addColorStop(0, rgba(col.hi, 0)); hl.addColorStop(.5, rgba(col.hi, dk ? .6 : .35)); hl.addColorStop(1, rgba(col.hi, 0));
-    g.fillStyle = hl; g.fillRect(0, hz - 1, w, 2);
-    // particles
-    const px = mx * w, py = my * h;
+    scene(T, dk);
+    // drifting dots
     for (const p of pts) {
       if (moving) { p.x = (p.x + p.vx + w) % w; p.y = (p.y + p.vy + h) % h; }
-      g.fillStyle = rgba(col.accent, dk ? .85 : .55); g.beginPath(); g.arc(p.x, p.y, p.r, 0, 7); g.fill();
+      g.fillStyle = rgba(col.accent, dk ? .7 : .45); g.beginPath(); g.arc(p.x, p.y, p.r, 0, 7); g.fill();
     }
-    g.lineWidth = .8;
-    for (let i = 0; i < pts.length; i++) {
-      const a = pts[i];
-      for (let j = i + 1; j < pts.length; j++) {
-        const b = pts[j], d = Math.hypot(a.x - b.x, a.y - b.y);
-        if (d < 120) { g.strokeStyle = rgba(col.accent, (1 - d / 120) * (dk ? .3 : .2)); g.beginPath(); g.moveTo(a.x, a.y); g.lineTo(b.x, b.y); g.stroke(); }
-      }
-      const d = Math.hypot(a.x - px, a.y - py);
-      if (d < 160) { g.strokeStyle = rgba(col.hi, (1 - d / 160) * .45); g.beginPath(); g.moveTo(a.x, a.y); g.lineTo(px, py); g.stroke(); }
+  }
+  // ---- runner chasing a goal: side-scrolling skyline, track, a neon runner and a flag it keeps catching ----
+  function scene(T, dk) {
+    const s = Math.max(.7, Math.min(1.3, h / 850)), gy = h * .9, L = 29 * s;
+    const ink = col.runner, A = dk ? 1 : .85;
+    // skyline (slow parallax)
+    const off = (T * 18) % skyW;
+    g.fillStyle = rgba(col.accent, dk ? .1 : .09);
+    for (let k = 0; k < 2; k++) for (const b of sky) {
+      const x = b.x - off + k * skyW; if (x > w || x + b.w < 0) continue;
+      g.fillRect(x, gy - b.h, b.w, b.h);
     }
+    g.fillStyle = rgba(col.accent, dk ? .18 : .14);
+    for (let k = 0; k < 2; k++) for (const b of sky) { const x = b.x - off + k * skyW; if (x > w || x + b.w < 0) continue; g.fillRect(x, gy - b.h, b.w, 2); }
+    // track
+    g.strokeStyle = rgba(col.accent, dk ? .55 : .45); g.lineWidth = 2; g.beginPath(); g.moveTo(0, gy); g.lineTo(w, gy); g.stroke();
+    g.strokeStyle = rgba(col.accent, dk ? .3 : .25); g.lineWidth = 2; g.setLineDash([22 * s, 26 * s]); g.lineDashOffset = T * 260 * s;
+    g.beginPath(); g.moveTo(0, gy + 12 * s); g.lineTo(w, gy + 12 * s); g.stroke(); g.setLineDash([]);
+    // chase cycle: the gap closes, the runner catches the flag, a new flag appears ahead
+    const D = 13, t = (T % D) / D, rx = w * (w < 700 ? .18 : .2) + Math.sin(T * .35) * w * .03;
+    const gap = 34 * s + (w * .72 - rx) * Math.pow(1 - t, 1.25), fx = rx + gap;
+    // speed lines
+    g.lineWidth = 2 * s;
+    for (let k = 0; k < 5; k++) {
+      const y = gy - L * (1.2 + k * .55), len = (40 + ((k * 37 + T * 90) % 60)) * s, x0 = rx - 30 * s - ((T * 300 + k * 53) % 90) * s;
+      g.strokeStyle = rgba(col.accent, .35 - k * .05); g.beginPath(); g.moveTo(x0, y); g.lineTo(x0 - len, y); g.stroke();
+    }
+    // goal flag
+    const fa = Math.min(1, t * 8) * A;
+    if (fa > 0) {
+      g.save(); g.globalAlpha = fa;
+      const ph = gy - 3.4 * L;
+      g.strokeStyle = ink; g.lineWidth = 2.5 * s; g.beginPath(); g.moveTo(fx, gy); g.lineTo(fx, ph); g.stroke();
+      g.fillStyle = col.flag; g.beginPath(); g.moveTo(fx, ph);
+      for (let k = 0; k <= 8; k++) g.lineTo(fx + k * 4.5 * s, ph + Math.sin(T * 6 + k * .7) * 3 * s);
+      g.lineTo(fx + 36 * s, ph + 14 * s);
+      for (let k = 8; k >= 0; k--) g.lineTo(fx + k * 4.5 * s, ph + 22 * s + Math.sin(T * 6 + k * .7) * 3 * s);
+      g.closePath(); g.fill();
+      const glow = g.createRadialGradient(fx + 18 * s, ph + 10 * s, 0, fx + 18 * s, ph + 10 * s, 70 * s);
+      glow.addColorStop(0, rgba(col.flag, .35)); glow.addColorStop(1, rgba(col.flag, 0)); g.fillStyle = glow; g.fillRect(fx - 60 * s, ph - 60 * s, 160 * s, 140 * s);
+      g.restore();
+    }
+    // catch burst (end of one cycle / start of the next)
+    const bt = t > .93 ? (t - .93) / .2 : t < .13 ? (t + .07) / .2 : -1;
+    if (bt >= 0) {
+      const cx = rx + 40 * s, cy = gy - 2.8 * L, R = 10 + bt * 120 * s;
+      g.strokeStyle = rgba(col.flag, (1 - bt) * .8); g.lineWidth = 3 * s; g.beginPath(); g.arc(cx, cy, R, 0, 7); g.stroke();
+      for (let k = 0; k < 10; k++) { const a = k / 10 * Math.PI * 2; g.fillStyle = rgba(k % 2 ? col.accent : col.flag, 1 - bt); g.beginPath(); g.arc(cx + Math.cos(a) * R * .8, cy + Math.sin(a) * R * .8, 3 * s, 0, 7); g.fill(); }
+    }
+    runner(rx, gy, L, T * 9.5, ink, A);
+  }
+  function runner(x, gy, L, ph, ink, A) {
+    const lim = (p, q, a, len) => [p[0] + Math.sin(a) * len, p[1] + Math.cos(a) * len];
+    const bob = Math.abs(Math.sin(ph)) * L * .12;
+    const hip = [x, gy - 1.9 * L - bob], lean = .32;
+    const sh = [hip[0] + Math.sin(lean) * 1.5 * L, hip[1] - Math.cos(lean) * 1.5 * L];
+    const head = [sh[0] + Math.sin(lean) * .62 * L, sh[1] - Math.cos(lean) * .62 * L];
+    const leg = p => { const th = .85 * Math.sin(p), k = .25 + 1.25 * (1 - Math.sin(p + .6)) / 2, knee = lim(hip, 0, th, L), foot = lim(knee, 0, th - k, L); return [hip, knee, foot]; };
+    const arm = p => { const a = -.8 * Math.sin(p) + .1, el = lim(sh, 0, a, .78 * L), hd = lim(el, 0, a + 1.5, .7 * L); return [sh, el, hd]; };
+    const line = (pts, alpha, wd) => { g.strokeStyle = ink; g.globalAlpha = alpha; g.lineWidth = wd; g.beginPath(); g.moveTo(...pts[0]); for (const q of pts.slice(1)) g.lineTo(...q); g.stroke(); };
+    g.save(); g.lineCap = g.lineJoin = 'round'; g.shadowColor = col.accent; g.shadowBlur = 14;
+    line(leg(ph + Math.PI), .45 * A, L * .2); line(arm(ph), .45 * A, L * .17);          // far side
+    line([hip, sh], A, L * .24);                                                          // torso
+    line(leg(ph), A, L * .22); line(arm(ph + Math.PI), A, L * .18);                       // near side
+    g.globalAlpha = A; g.fillStyle = ink; g.beginPath(); g.arc(head[0], head[1], L * .34, 0, 7); g.fill();
+    // ground shadow
+    g.shadowBlur = 0; g.globalAlpha = .18 * A; g.fillStyle = ink; g.beginPath(); g.ellipse(x + 6, gy + 2, L * .9, L * .12, 0, 0, 7); g.fill();
+    g.restore();
   }
   function loop(ts) { raf = requestAnimationFrame(loop); if (ts - last < 33) return; last = ts; draw(ts / 1000, true); }
   size();
-  addEventListener('resize', () => { size(); if (!raf) draw(0, false); });
+  addEventListener('resize', () => { size(); if (!raf) draw(6.5, false); });
   return {
-    set(o) { const ch = JSON.stringify(o) !== JSON.stringify(col); col = o; if (ch && !raf) draw(0, false); },
-    run(on) { if (on && !raf) raf = requestAnimationFrame(loop); else if (!on && raf) { cancelAnimationFrame(raf); raf = 0; draw(0, false); } },
+    set(o) { const ch = JSON.stringify(o) !== JSON.stringify(col); col = o; if (ch && !raf) draw(6.5, false); },
+    run(on) { if (on && !raf) raf = requestAnimationFrame(loop); else if (!on && raf) { cancelAnimationFrame(raf); raf = 0; draw(6.5, false); } },
     move(x, y) { mx = x / w; my = y / h; }
   };
 })();
 document.addEventListener('visibilitychange', () => BG.run(!document.hidden && S.settings.bgAnim && !matchMedia('(prefers-reduced-motion: reduce)').matches));
+
+// ---- focus music: embedded YouTube (keeps playing across sections) + generated ambient sounds ----
+const TRACKS = [
+  { id: 'jhND3palDlw', title: 'Cozy Pomodoro 25/5 · lofi · 2h' },
+  { id: '4TNu6_De4V4', title: 'Study with me 25/5 · city lofi · 2h' },
+  { id: 'u3-_tP1vxqM', title: 'Deep focus 25/5 · lofi · 3h' },
+  { id: 'QSPNEt6srVE', title: 'Rainy jazz Pomodoro 25/5 · 2h' },
+  { id: 'pa4IR3VYUaQ', title: 'Pomodoro 25/5 · lofi · 2h' },
+  { id: 'qvg46sNbg4I', title: 'Pomodoro 25/5 × 4 · 2h' },
+  { id: '3NxVsr4SIZc', title: 'Cosmic Pomodoro 25/5 · no music' },
+  { id: 'X4VbdwhkE10', title: 'Lofi Girl · lofi hip hop radio (live)' }
+];
+const ytId = u => { const m = String(u).trim().match(/(?:youtu\.be\/|v=|\/live\/|\/embed\/|\/shorts\/)([\w-]{11})/) || String(u).trim().match(/^([\w-]{11})$/); return m && m[1]; };
+const allTracks = () => [...TRACKS, ...S.music.custom];
+
+const Music = (() => {
+  let yt = null, ready = false, wantPlay = false, apiP = null;
+  let ac = null, amb = null;
+  const api = () => apiP || (apiP = new Promise(res => {
+    window.onYouTubeIframeAPIReady = res;
+    const sc = document.createElement('script'); sc.src = 'https://www.youtube.com/iframe_api'; document.head.append(sc);
+  }));
+  const cur = () => allTracks().find(x => x.id === S.music.cur) || allTracks()[0];
+  function dock() {
+    const d = $('#dock'), tr = cur();
+    d.hidden = !yt;
+    $('#dockTitle').textContent = tr ? tr.title : '';
+    $('#dockPlay').textContent = wantPlay ? '❚❚' : '▶';
+  }
+  async function ensure() {
+    if (yt) return;
+    await api();
+    yt = new YT.Player('ytHost', {
+      videoId: cur().id, host: 'https://www.youtube-nocookie.com',
+      playerVars: { playsinline: 1, rel: 0, modestbranding: 1, autoplay: wantPlay ? 1 : 0 },
+      events: {
+        onReady: () => { ready = true; yt.setVolume(S.music.vol); if (wantPlay) yt.playVideo(); dock(); },
+        onStateChange: e => { if (e.data === 1) wantPlay = true; else if (e.data === 2) wantPlay = false; dock(); },
+        onError: () => toast('▶ ' + t('openYt') + ': youtube.com/watch?v=' + cur().id)
+      }
+    });
+    dock();
+  }
+  // generated noise, so there is always something to play even offline
+  function startAmb(kind) {
+    stopAmb(); if (kind === 'off') return;
+    ac = ac || new (window.AudioContext || window.webkitAudioContext)(); ac.resume();
+    const len = ac.sampleRate * 4, buf = ac.createBuffer(2, len, ac.sampleRate);
+    for (let ch = 0; ch < 2; ch++) {
+      const d = buf.getChannelData(ch); let last = 0;
+      for (let i = 0; i < len; i++) { const w = Math.random() * 2 - 1; last = kind === 'rain' ? w : (last + .02 * w) / 1.02; d[i] = kind === 'rain' ? w * .5 : last * 3.5; }
+    }
+    const src = ac.createBufferSource(); src.buffer = buf; src.loop = true;
+    const f = ac.createBiquadFilter(); f.type = kind === 'rain' ? 'bandpass' : 'lowpass'; f.frequency.value = kind === 'rain' ? 1400 : 700; f.Q.value = kind === 'rain' ? .4 : .7;
+    const g = ac.createGain(); g.gain.value = S.music.vol / 100 * .6;
+    src.connect(f).connect(g).connect(ac.destination);
+    let lfo = null;
+    if (kind === 'ocean') { // slow swell of waves
+      lfo = ac.createOscillator(); lfo.frequency.value = .09; const lg = ac.createGain(); lg.gain.value = S.music.vol / 100 * .45;
+      lfo.connect(lg).connect(g.gain); lfo.start();
+    }
+    src.start(); amb = { src, g, lfo };
+  }
+  function stopAmb() { if (amb) { try { amb.src.stop(); amb.lfo?.stop(); } catch { } amb = null; } }
+  return {
+    preload() { if (S.music.cur) api(); },
+    async play() {
+      if (S.music.amb !== 'off') startAmb(S.music.amb);
+      if (!S.music.cur) return;
+      wantPlay = true;
+      if (yt && ready) yt.playVideo(); else await ensure();
+      dock();
+    },
+    pause() { wantPlay = false; if (yt && ready) yt.pauseVideo(); stopAmb(); dock(); },
+    toggle() { wantPlay ? this.pause() : this.play(); },
+    async pick(id) {
+      if (!id) { S.music.cur = ''; save(); this.stop(); render(); return; }
+      S.music.cur = id; save(); wantPlay = true;
+      if (yt && ready) yt.loadVideoById(id); else await ensure();
+      dock(); render();
+    },
+    next() { const L = allTracks(), i = L.findIndex(x => x.id === S.music.cur); this.pick(L[(i + 1) % L.length].id); },
+    stop() { wantPlay = false; stopAmb(); if (yt) { yt.destroy(); yt = null; ready = false; const h = document.createElement('div'); h.id = 'ytHost'; $('#dockVideo').replaceChildren(h); } dock(); },
+    amb(kind) { S.music.amb = kind; save(); kind === 'off' ? stopAmb() : startAmb(kind); }, // picking a sound previews it
+    vol(v) { S.music.vol = v; if (yt && ready) yt.setVolume(v); if (amb) amb.g.gain.value = v / 100 * .6; },
+    playing: () => wantPlay
+  };
+})();
+
+function musicCard() {
+  const m = S.music, c = el('div', 'card music');
+  c.style.marginTop = '14px';
+  c.innerHTML = `<h3>♫ ${t('music')}</h3>
+    <div class="row wrap" style="margin-bottom:12px"><span class="meta" style="margin:0">${t('autoMusic')}</span>
+      <div class="seg" id="ma"><button data-v="1" class="${m.auto ? 'on' : ''}">${t('on')}</button><button data-v="0" class="${m.auto ? '' : 'on'}">${t('off')}</button></div></div>
+    <div class="tracks"><div class="trk ${m.cur ? '' : 'on'}" data-id=""><button class="pick">∅ ${t('noYt')}</button></div>${allTracks().map(x => `<div class="trk ${x.id === m.cur ? 'on' : ''}" data-id="${x.id}">
+      <button class="pick" aria-label="${esc(x.title)}"><span class="eq"><i></i><i></i><i></i></span>${esc(x.title)}</button>
+      <a href="https://www.youtube.com/watch?v=${x.id}" target="_blank" rel="noopener" title="${esc(t('openYt'))}" aria-label="${esc(t('openYt'))}">↗</a>
+      ${x.custom ? `<button class="rm" aria-label="${esc(t('del'))}">×</button>` : ''}</div>`).join('')}</div>
+    <form class="row" id="myt" style="margin-top:10px"><input name="u" placeholder="${esc(t('pasteYt'))}" style="flex:1"><button class="btn">+ ${t('addYt')}</button></form>
+    <p class="meta" style="margin:8px 0 14px">${t('ytNote')}</p>
+    <h3>${t('ambient')}</h3>
+    <div class="row wrap"><div class="seg" id="mb">${['off', 'rain', 'brown', 'ocean'].map(k => `<button data-v="${k}" class="${m.amb === k ? 'on' : ''}">${t('amb_' + k)}</button>`).join('')}</div>
+      <label class="meta" style="margin:0;align-items:center">${t('volume')} <input type="range" min="0" max="100" value="${m.vol}" id="mv"></label></div>`;
+  c.querySelectorAll('#ma button').forEach(b => b.onclick = () => { m.auto = b.dataset.v === '1'; update(); });
+  c.querySelectorAll('.trk').forEach(r => {
+    r.querySelector('.pick').onclick = () => Music.pick(r.dataset.id);
+    const rm = r.querySelector('.rm');
+    if (rm) rm.onclick = () => { m.custom = m.custom.filter(x => x.id !== r.dataset.id); if (m.cur === r.dataset.id) m.cur = TRACKS[0].id; update(); };
+  });
+  c.querySelector('#myt').onsubmit = e => {
+    e.preventDefault(); const id = ytId(e.target.u.value);
+    if (!id) return toast(t('badYt'));
+    if (!allTracks().some(x => x.id === id)) m.custom.push({ id, title: `${t('myLink')} ${m.custom.length + 1} · ${id}`, custom: true });
+    Music.pick(id);
+  };
+  c.querySelectorAll('#mb button').forEach(b => b.onclick = () => { Music.amb(b.dataset.v); render(); });
+  c.querySelector('#mv').oninput = e => Music.vol(+e.target.value);
+  c.querySelector('#mv').onchange = () => save();
+  Music.preload();
+  return c;
+}
+$('#dockPlay').onclick = () => Music.toggle();
+$('#dockNext').onclick = () => Music.next();
+$('#dockClose').onclick = () => Music.stop();
+$('#dockMin').onclick = () => $('#dock').classList.toggle('min');
 
 // ---- pomodoro (runs outside render so it keeps counting) ----
 const fmt = s => `${pad(Math.floor(s / 60))}:${pad(s % 60)}`;
@@ -678,12 +854,15 @@ function beep() { try { const a = new AudioContext(), o = a.createOscillator(); 
 const P = {
   mode: 'focus', left: 25 * 60, run: null,
   total() { return (this.mode === 'focus' ? S.settings.focusMin : S.settings.breakMin) * 60; },
-  toggle() { if (this.run) { clearInterval(this.run); this.run = null; } else this.run = setInterval(() => this.tick(), 1000); },
+  toggle() {
+    if (this.run) { clearInterval(this.run); this.run = null; } else this.run = setInterval(() => this.tick(), 1000);
+    if (S.music.auto) this.run ? Music.play() : Music.pause();
+  },
   next(finished) {
     if (finished && this.mode === 'focus') { S.pomoLog[today()] = (S.pomoLog[today()] || 0) + 1; save(); }
     this.mode = this.mode === 'focus' ? 'break' : 'focus'; this.left = this.total();
   },
-  reset() { clearInterval(this.run); this.run = null; this.mode = 'focus'; this.left = this.total(); document.title = 'MINH//OS'; },
+  reset() { if (this.run && S.music.auto) Music.pause(); clearInterval(this.run); this.run = null; this.mode = 'focus'; this.left = this.total(); document.title = 'MINH//OS'; },
   tick() {
     if (--this.left <= 0) { beep(); toast(t('fin')); this.next(true); render(); }
     document.querySelectorAll('[data-pomo]').forEach(e => e.textContent = fmt(this.left));
@@ -714,6 +893,7 @@ setInterval(() => {
 function boot() {
   if (!Array.isArray(S.routine)) S.routine = seedRoutine();
   S.sched = S.sched || {};
+  S.music = { cur: TRACKS[0].id, auto: true, amb: 'off', vol: 60, custom: [], ...(S.music || {}) };
   S.settings.v = 4; P.left = P.total(); fromHash();
 }
 fetch('/api/state').then(authCheck).then(r => r.json()).then(d => {

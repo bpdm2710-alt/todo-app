@@ -1,6 +1,6 @@
 // Keeps the app shell (HTML/CSS/JS/icons) available so the installed app opens fast.
 // Network first, so a new deploy shows up on the next launch; data (/api) is never cached.
-const CACHE = 'minh-os-v1';
+const CACHE = 'minh-os-v2';
 const SHELL = ['/', '/static/style.css', '/static/app.js', '/manifest.webmanifest', '/static/icons/icon-192.png'];
 
 self.addEventListener('install', e => {

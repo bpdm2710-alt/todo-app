@@ -3,18 +3,28 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#060912">
 <title>To-Do</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Rajdhani:wght@500;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
 <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
+<header class="top">
+  <button id="menuBtn" class="icon-btn" aria-label="Menu" aria-controls="nav" aria-expanded="false">☰</button>
+  <a class="logo" href="#dashboard">TODO<span>//</span>OS</a>
+  <div id="hud"></div>
+</header>
 <div class="app">
-  <nav id="nav"></nav>
+  <nav id="nav" aria-label="Main menu"></nav>
   <main>
+    <div class="head"><h2 id="title"></h2><span id="crumb"></span></div>
     <form id="add" autocomplete="off"></form>
     <div id="view"></div>
   </main>
-  <aside id="side"></aside>
 </div>
+<div id="scrim"></div>
 <div id="toast" role="status"></div>
 <script src="/static/app.js"></script>
 </body>
